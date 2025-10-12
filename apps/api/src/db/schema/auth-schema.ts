@@ -1,11 +1,53 @@
-import { pgTable, text, timestamp, boolean } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
+import {
+	pgTable,
+	text,
+	timestamp,
+	boolean,
+	bigint as pgBigInt,
+} from "drizzle-orm/pg-core";
+import { pgEnum, index } from "drizzle-orm/pg-core";
 
+// Enums for transactions
+export const currencyEnum = pgEnum("currency", ["NGN", "KES", "USDC", "USDT"]);
+export const txStatusEnum = pgEnum("tx_status", [
+	"pending",
+	"success",
+	"failed",
+	"reversed",
+]);
+export const txDirectionEnum = pgEnum("tx_direction", ["credit", "debit"]);
+export const providerEnum = pgEnum("provider", [
+	"paystack",
+	"system",
+	"manual",
+]);
+
+// Simplified MVP user schema
+// - address, email, username
+// - kyc (true by default)
+// - balances in minor units (cents/kobo) to avoid floating point issues
 export const user = pgTable("user", {
 	id: text("id").primaryKey(),
-	name: text("name").notNull(),
+
+	// Web3 or unique user address (EVM): TS type narrowed to `0x${string}`
+	// Store lowercase in app logic to ensure case-insensitive uniqueness.
+	address: text("address").$type<`0x${string}`>().notNull().unique(),
+
 	email: text("email").notNull().unique(),
-	emailVerified: boolean("email_verified").default(false).notNull(),
-	image: text("image"),
+	username: text("username").notNull().unique(),
+
+	// KYC flag (MVP defaults to true)
+	kyc: boolean("kyc").default(true).notNull(),
+
+	// Balances stored in smallest units (e.g., kobo/cents) as 64-bit integers
+	ngnBalance: pgBigInt("ngn_balance", { mode: "bigint" })
+		.notNull()
+		.default(sql`0`),
+	kesBalance: pgBigInt("kes_balance", { mode: "bigint" })
+		.notNull()
+		.default(sql`0`),
+
 	createdAt: timestamp("created_at").defaultNow().notNull(),
 	updatedAt: timestamp("updated_at")
 		.defaultNow()
@@ -13,49 +55,43 @@ export const user = pgTable("user", {
 		.notNull(),
 });
 
-export const session = pgTable("session", {
-	id: text("id").primaryKey(),
-	expiresAt: timestamp("expires_at").notNull(),
-	token: text("token").notNull().unique(),
-	createdAt: timestamp("created_at").defaultNow().notNull(),
-	updatedAt: timestamp("updated_at")
-		.$onUpdate(() => /* @__PURE__ */ new Date())
-		.notNull(),
-	ipAddress: text("ip_address"),
-	userAgent: text("user_agent"),
-	userId: text("user_id")
-		.notNull()
-		.references(() => user.id, { onDelete: "cascade" }),
-});
+// Transactions ledger table suited for Paystack integration
+// - amount: minor units (kobo/cents)
+// - currency: NGN/KES/etc.
+// - direction: credit (inflow) or debit (outflow)
+// - status: pending/success/failed/reversed
+// - provider: paystack/system/manual
+// - providerRef: reference from the payment provider (e.g., Paystack reference)
+// - metadata: optional JSON string for extra details
+export const transactions = pgTable(
+	"transactions",
+	{
+		id: text("id").primaryKey(),
+		userId: text("user_id")
+			.notNull()
+			.references(() => user.id, { onDelete: "cascade" }),
 
-export const account = pgTable("account", {
-	id: text("id").primaryKey(),
-	accountId: text("account_id").notNull(),
-	providerId: text("provider_id").notNull(),
-	userId: text("user_id")
-		.notNull()
-		.references(() => user.id, { onDelete: "cascade" }),
-	accessToken: text("access_token"),
-	refreshToken: text("refresh_token"),
-	idToken: text("id_token"),
-	accessTokenExpiresAt: timestamp("access_token_expires_at"),
-	refreshTokenExpiresAt: timestamp("refresh_token_expires_at"),
-	scope: text("scope"),
-	password: text("password"),
-	createdAt: timestamp("created_at").defaultNow().notNull(),
-	updatedAt: timestamp("updated_at")
-		.$onUpdate(() => /* @__PURE__ */ new Date())
-		.notNull(),
-});
+		amount: pgBigInt("amount", { mode: "bigint" }).notNull(),
+		currency: currencyEnum("currency").notNull(),
+		direction: txDirectionEnum("direction").notNull(),
+		status: txStatusEnum("status").notNull().default("pending"),
+		provider: providerEnum("provider").notNull().default("paystack"),
+		providerRef: text("provider_ref"),
+		description: text("description"),
+		metadata: text("metadata"),
 
-export const verification = pgTable("verification", {
-	id: text("id").primaryKey(),
-	identifier: text("identifier").notNull(),
-	value: text("value").notNull(),
-	expiresAt: timestamp("expires_at").notNull(),
-	createdAt: timestamp("created_at").defaultNow().notNull(),
-	updatedAt: timestamp("updated_at")
-		.defaultNow()
-		.$onUpdate(() => /* @__PURE__ */ new Date())
-		.notNull(),
-});
+		createdAt: timestamp("created_at").defaultNow().notNull(),
+		updatedAt: timestamp("updated_at")
+			.defaultNow()
+			.$onUpdate(() => /* @__PURE__ */ new Date())
+			.notNull(),
+	},
+	(t) => ({
+		// Fast lookups for reconciliation (providerRef may be nullable; use non-unique index)
+		providerRefIdx: index("transactions_provider_ref_idx").on(t.providerRef),
+		userCreatedIdx: index("transactions_user_created_idx").on(
+			t.userId,
+			t.createdAt,
+		),
+	}),
+);

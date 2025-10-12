@@ -7,7 +7,7 @@
 			class="hidden lg:inline-flex" />
 
 		<div class="flex items-center gap-1.5">
-			<UButton  :onclick="router.push('/dashboard')">Dashboard</UButton>
+			<UButton @click="router.push('/dashboard')">Dashboard</UButton>
 			<div class="inline-flex lg:hidden">
 				<USlideover title="0xMove" description="">
 					<UButton
@@ -30,7 +30,7 @@
 
 <script setup lang="ts">
 import type { NavigationMenuItem } from "@nuxt/ui";
-const router = useRouter()
+const router = useRouter();
 
 const items = ref<NavigationMenuItem[][]>([
 	[
