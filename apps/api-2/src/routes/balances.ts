@@ -3,8 +3,9 @@ import { db } from "../db/drizzle";
 import { user } from "../db/schema/auth-schema";
 import { eq } from "drizzle-orm";
 import { createPublicClient, http } from "viem";
-import { base, baseSepolia } from "viem/chains";
-import { USDC, USDT } from "../config/tokens";
+import { base } from "viem/chains";
+import { USDC, USDT } from "@0xmove/config/tokens";
+import { SUPPORTED_CHAIN_IDS, CHAIN_BY_ID } from "@0xmove/config/chains";
 
 const isEvmAddress = (addr: unknown): addr is `0x${string}` =>
 	typeof addr === "string" && /^0x[a-fA-F0-9]{40}$/.test(addr);
@@ -39,16 +40,10 @@ balances.get("/", async (c) => {
 		const envUsdc = (process.env.USDC_ADDRESS || "").trim();
 		const envUsdt = (process.env.USDT_ADDRESS || "").trim();
 
-		// Build list of chains to query. If a specific chainId is provided, query only that; otherwise, query all known chains in config.
-		const knownChains = [base, baseSepolia];
+		// Build list of chains to query. If a specific chainId is provided, query only that; otherwise, query all supported chains.
 		const chainIdsToQuery = chainIdParam
 			? [Number(chainIdParam)]
-			: Array.from(
-					new Set([
-						...Object.keys(USDC).map((x) => Number(x)),
-						...Object.keys(USDT).map((x) => Number(x)),
-					]),
-				);
+			: SUPPORTED_CHAIN_IDS.slice();
 
 		// 1) Fiat from DB
 		const addressNorm = address.toLowerCase() as `0x${string}`;
@@ -77,7 +72,7 @@ balances.get("/", async (c) => {
 			const usdcAddress = (envUsdc || cfgUsdc).trim();
 			const usdtAddress = (envUsdt || cfgUsdt).trim();
 
-			const chain = knownChains.find((c) => c.id === cid) || {
+			const chain = (CHAIN_BY_ID as any)[cid] || {
 				...base,
 				id: cid,
 				rpcUrls: base.rpcUrls,

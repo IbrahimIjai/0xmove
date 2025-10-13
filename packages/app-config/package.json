@@ -1,9 +1,20 @@
 {
-	"name": "@he0xmove/config",
+	"name": "@0xmove/config",
 	"version": "0.0.0",
 	"private": true,
+	"type": "module",
 	"scripts": {
 		"typecheck": "tsc --pretty"
+	},
+	"exports": {
+		"./chains": {
+			"types": "./src/chains.ts",
+			"default": "./src/chains.ts"
+		},
+		"./tokens": {
+			"types": "./src/tokens.ts",
+			"default": "./src/tokens.ts"
+		}
 	},
 	"dependencies": {
 		"viem": "^2.37.9"

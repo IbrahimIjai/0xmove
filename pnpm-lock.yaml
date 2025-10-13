@@ -17,6 +17,9 @@ importers:
 
   apps/api-2:
     dependencies:
+      '@0xmove/config':
+        specifier: workspace:*
+        version: link:../../packages/app-config
       dotenv:
         specifier: ^17.2.3
         version: 17.2.3
