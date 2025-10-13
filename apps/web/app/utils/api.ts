@@ -13,6 +13,14 @@ export type ApiUser = {
 };
 
 type ApiResponse<T> = { user?: T; existed?: boolean; error?: string };
+export type BalancesResponse = {
+	address: `0x${string}`;
+	chainId: number;
+	fiat: { NGN: string; KES: string };
+	crypto: { USDC: string; USDT: string };
+	tokenDecimals: { USDC: number; USDT: number };
+	updatedAt: string;
+};
 
 const buildBaseUrl = () => {
 	const cfg = useRuntimeConfig();
@@ -49,5 +57,17 @@ export const api = {
 		const data = (await res.json()) as ApiResponse<ApiUser>;
 		if (!data.user) throw new Error("No user in response");
 		return data.user;
+	},
+	async getBalances(
+		address: `0x${string}`,
+		chainId?: number,
+	): Promise<BalancesResponse> {
+		const base = buildBaseUrl();
+		const url = new URL(`${base}/balances`, window.location.origin);
+		url.searchParams.set("address", address);
+		if (chainId) url.searchParams.set("chainId", String(chainId));
+		const res = await fetch(url.toString(), { credentials: "include" });
+		if (!res.ok) throw new Error(`Failed to fetch balances: ${res.status}`);
+		return (await res.json()) as BalancesResponse;
 	},
 };

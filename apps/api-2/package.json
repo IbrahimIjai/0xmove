@@ -9,7 +9,8 @@
   "dependencies": {
     "dotenv": "^17.2.3",
     "drizzle-orm": "^0.44.5",
-    "hono": "^4.9.11"
+    "hono": "^4.9.11",
+    "viem": "^2.37.9"
   },
   "devDependencies": {
     "drizzle-kit": "^0.31.5",

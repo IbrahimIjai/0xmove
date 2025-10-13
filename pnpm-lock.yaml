@@ -63,6 +63,9 @@ importers:
       hono:
         specifier: ^4.9.11
         version: 4.9.11
+      viem:
+        specifier: ^2.37.9
+        version: 2.37.9(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.11)
     devDependencies:
       drizzle-kit:
         specifier: ^0.31.5
@@ -11968,7 +11971,7 @@ snapshots:
 
   '@types/pg@8.15.5':
     dependencies:
-      '@types/node': 20.19.19
+      '@types/node': 22.18.8
       pg-protocol: 1.10.3
       pg-types: 2.2.0
 
