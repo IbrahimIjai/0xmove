@@ -45,23 +45,33 @@
 			<div v-else-if="balances.query.error.value" class="text-red-500 text-sm">
 				{{ String(balances.query.error.value) }}
 			</div>
-			<div v-else class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+			<div v-else class="grid grid-cols-1 gap-4">
 				<UCard>
-					<div class="flex items-center justify-between">
-						<div>
-							<div class="text-sm opacity-75">USDC</div>
-							<div class="text-2xl font-semibold">
-								{{ formatToken(balances.query.data.value?.crypto.USDC, 6) }}
+					<div class="space-y-2">
+						<div class="text-sm opacity-75">USDC</div>
+						<div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+							<div
+								v-for="entry in (balances.query.data.value?.crypto.USDC || [])"
+								:key="'usdc-'+entry.chainId"
+								class="flex items-center justify-between"
+							>
+								<span class="text-xs opacity-70">Chain {{ entry.chainId }}</span>
+								<span class="text-lg font-semibold">{{ formatToken(entry.balance, 6) }}</span>
 							</div>
 						</div>
 					</div>
 				</UCard>
 				<UCard>
-					<div class="flex items-center justify-between">
-						<div>
-							<div class="text-sm opacity-75">USDT</div>
-							<div class="text-2xl font-semibold">
-								{{ formatToken(balances.query.data.value?.crypto.USDT, 6) }}
+					<div class="space-y-2">
+						<div class="text-sm opacity-75">USDT</div>
+						<div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+							<div
+								v-for="entry in (balances.query.data.value?.crypto.USDT || [])"
+								:key="'usdt-'+entry.chainId"
+								class="flex items-center justify-between"
+							>
+								<span class="text-xs opacity-70">Chain {{ entry.chainId }}</span>
+								<span class="text-lg font-semibold">{{ formatToken(entry.balance, 6) }}</span>
 							</div>
 						</div>
 					</div>

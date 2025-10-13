@@ -2,8 +2,9 @@ import { Hono } from "hono";
 import { db } from "../db/drizzle";
 import { user } from "../db/schema/auth-schema";
 import { eq } from "drizzle-orm";
-import { createPublicClient, http, formatUnits } from "viem";
-import { base } from "viem/chains";
+import { createPublicClient, http } from "viem";
+import { base, baseSepolia } from "viem/chains";
+import { USDC, USDT } from "../config/tokens";
 
 const isEvmAddress = (addr: unknown): addr is `0x${string}` =>
 	typeof addr === "string" && /^0x[a-fA-F0-9]{40}$/.test(addr);
@@ -34,9 +35,20 @@ balances.get("/", async (c) => {
 
 		const chainId = chainIdParam ? Number(chainIdParam) : base.id;
 		const rpcUrl = (process.env.RPC_URL || "").trim() || undefined;
-		const usdcAddress = (process.env.USDC_ADDRESS || "").trim();
-		const usdtAddress = (process.env.USDT_ADDRESS || "").trim();
-		const useCrypto = usdcAddress && usdtAddress;
+		// Prefer config mapping; fallback to env overrides if provided
+		const envUsdc = (process.env.USDC_ADDRESS || "").trim();
+		const envUsdt = (process.env.USDT_ADDRESS || "").trim();
+
+		// Build list of chains to query. If a specific chainId is provided, query only that; otherwise, query all known chains in config.
+		const knownChains = [base, baseSepolia];
+		const chainIdsToQuery = chainIdParam
+			? [Number(chainIdParam)]
+			: Array.from(
+				new Set([
+					...Object.keys(USDC).map((x) => Number(x)),
+					...Object.keys(USDT).map((x) => Number(x)),
+				]),
+			);
 
 		// 1) Fiat from DB
 		const addressNorm = address.toLowerCase() as `0x${string}`;
@@ -51,43 +63,61 @@ balances.get("/", async (c) => {
 			KES: existing[0]?.kesBalance?.toString?.() ?? "0",
 		};
 
-		// 2) Crypto via viem (optional if env set)
-		let crypto = { USDC: "0", USDT: "0" };
-		if (useCrypto) {
+		// 2) Crypto via viem across chains
+		const crypto: { USDC: Array<{ chainId: number; balance: string }>; USDT: Array<{ chainId: number; balance: string }> } = {
+			USDC: [],
+			USDT: [],
+		};
+		for (const cid of chainIdsToQuery) {
+			const cfgUsdc = (USDC as Record<number, string>)[cid] || "";
+			const cfgUsdt = (USDT as Record<number, string>)[cid] || "";
+			const usdcAddress = (envUsdc || cfgUsdc).trim();
+			const usdtAddress = (envUsdt || cfgUsdt).trim();
+
+			const chain = knownChains.find((c) => c.id === cid) || {
+				...base,
+				id: cid,
+				rpcUrls: base.rpcUrls,
+			};
 			const client = createPublicClient({
-				chain: { ...base, id: chainId },
-				transport: http(rpcUrl || base.rpcUrls.default.http[0]),
+				chain,
+				transport: http(rpcUrl || chain.rpcUrls.default.http[0]),
 			});
+
+			const contracts: any[] = [];
+			const mapIndex: Array<'USDC' | 'USDT'> = [];
+			if (usdcAddress) {
+				contracts.push({ address: usdcAddress as `0x${string}`, abi: ERC20_ABI, functionName: 'balanceOf', args: [address] });
+				mapIndex.push('USDC');
+			}
+			if (usdtAddress) {
+				contracts.push({ address: usdtAddress as `0x${string}`, abi: ERC20_ABI, functionName: 'balanceOf', args: [address] });
+				mapIndex.push('USDT');
+			}
+
+			if (!contracts.length) {
+				continue;
+			}
+
 			try {
-				const [usdc, usdt] = await Promise.all([
-					client.readContract({
-						address: usdcAddress as `0x${string}`,
-						abi: ERC20_ABI,
-						functionName: "balanceOf",
-						args: [address],
-					}),
-					client.readContract({
-						address: usdtAddress as `0x${string}`,
-						abi: ERC20_ABI,
-						functionName: "balanceOf",
-						args: [address],
-					}),
-				]);
-				crypto = {
-					USDC: (usdc as bigint).toString(),
-					USDT: (usdt as bigint).toString(),
-				};
+				const results: any[] = await client.multicall({ contracts, allowFailure: true });
+				results.forEach((r: any, idx: number) => {
+					const token = mapIndex[idx];
+					const balance = r?.result ? (r.result as bigint).toString() : '0';
+					crypto[token].push({ chainId: cid, balance });
+				});
 			} catch (e) {
-				// leave crypto as zero on failure
+				// push zeros in case of failure
+				mapIndex.forEach((token) => crypto[token].push({ chainId: cid, balance: '0' }));
 			}
 		}
 
 		return c.json(
 			{
 				address,
-				chainId,
+				queriedChains: chainIdsToQuery,
 				fiat, // minor units (e.g., kobo/cents) as strings
-				crypto, // token base units (6 decimals) as strings
+				crypto, // per-token arrays of { chainId, balance }
 				tokenDecimals: { USDC: 6, USDT: 6 },
 				updatedAt: new Date().toISOString(),
 			},

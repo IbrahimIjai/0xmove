@@ -15,9 +15,9 @@ export type ApiUser = {
 type ApiResponse<T> = { user?: T; existed?: boolean; error?: string };
 export type BalancesResponse = {
 	address: `0x${string}`;
-	chainId: number;
+	queriedChains: number[];
 	fiat: { NGN: string; KES: string };
-	crypto: { USDC: string; USDT: string };
+	crypto: { USDC: Array<{ chainId: number; balance: string }>; USDT: Array<{ chainId: number; balance: string }> };
 	tokenDecimals: { USDC: number; USDT: number };
 	updatedAt: string;
 };
