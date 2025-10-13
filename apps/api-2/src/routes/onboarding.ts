@@ -9,6 +9,37 @@ const isEvmAddress = (addr: unknown): addr is `0x${string}` =>
 
 const onboarding = new Hono();
 
+type DbUser = typeof user.$inferSelect;
+const serializeUser = (u: DbUser) => ({
+	...u,
+	ngnBalance: (u as any).ngnBalance?.toString?.() ?? "0",
+	kesBalance: (u as any).kesBalance?.toString?.() ?? "0",
+});
+
+// GET /onboarding?address=0x...
+// Returns the user if found, else 404
+onboarding.get("/", async (c) => {
+	try {
+		const url = new URL(c.req.url);
+		const address = url.searchParams.get("address") ?? undefined;
+		if (!isEvmAddress(address)) {
+			return c.json({ error: "Invalid or missing address" }, 400);
+		}
+		const addressNorm = address.toLowerCase() as `0x${string}`;
+		const existing = await db
+			.select()
+			.from(user)
+			.where(eq(user.address, addressNorm))
+			.limit(1);
+		if (!existing[0]) {
+			return c.json({ error: "User not found" }, 404);
+		}
+		return c.json({ user: serializeUser(existing[0]) }, 200);
+	} catch (err) {
+		return c.json({ error: "Unexpected error" }, 500);
+	}
+});
+
 // POST /onboarding
 // body: { address: `0x${string}`, email: string, username: string }
 onboarding.post("/", async (c) => {
@@ -52,7 +83,7 @@ onboarding.post("/", async (c) => {
 				})
 				.returning();
 
-			return c.json({ user: inserted[0] }, 201);
+			return c.json({ user: serializeUser(inserted[0]) }, 201);
 		} catch (e) {
 			// likely unique constraint violation on address/email/username
 			const existing = await db
@@ -61,7 +92,7 @@ onboarding.post("/", async (c) => {
 				.where(eq(user.address, addressNorm))
 				.limit(1);
 			if (existing[0]) {
-				return c.json({ user: existing[0], existed: true }, 200);
+				return c.json({ user: serializeUser(existing[0]), existed: true }, 200);
 			}
 			// as a fallback, try email/username lookup
 			const byEmail = await db
@@ -70,7 +101,7 @@ onboarding.post("/", async (c) => {
 				.where(eq(user.email, email))
 				.limit(1);
 			if (byEmail[0]) {
-				return c.json({ user: byEmail[0], existed: true }, 200);
+				return c.json({ user: serializeUser(byEmail[0]), existed: true }, 200);
 			}
 			return c.json({ error: "Could not create user" }, 500);
 		}

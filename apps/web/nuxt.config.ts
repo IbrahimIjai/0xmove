@@ -8,6 +8,8 @@ export default defineNuxtConfig({
 	runtimeConfig: {
 		public: {
 			projectId: process.env.NUXT_PROJECT_ID,
+			// Base URL for backend API (e.g., http://localhost:8787 if using wrangler dev)
+			apiBase: process.env.NUXT_PUBLIC_API_BASE || "/api",
 		},
 	},
 	modules: [
