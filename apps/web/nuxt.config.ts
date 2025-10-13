@@ -65,4 +65,21 @@ export default defineNuxtConfig({
 	},
 	css: ["~/assets/css/main.css"],
 	compatibilityDate: "2025-01-03",
+
+	// Proxy API calls in dev so the frontend can use "/api" without CORS issues
+	routeRules: {
+		"/api/**": {
+			proxy:
+				(process.env.NUXT_PUBLIC_API_BASE || "http://127.0.0.1:8787") + "/**",
+		},
+	},
+	nitro: {
+		// For older tooling or custom setups; routeRules above is usually enough
+		devProxy: {
+			"/api": {
+				target: process.env.NUXT_PUBLIC_API_BASE || "http://127.0.0.1:8787",
+				changeOrigin: true,
+			},
+		},
+	},
 });
