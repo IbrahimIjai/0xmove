@@ -21,6 +21,7 @@
 		"vue": "latest"
 	},
 	"dependencies": {
+		"@0xmove/config": "workspace:*",
 		"@iconify-json/lucide": "^1.2.46",
 		"@nuxtjs/seo": "^3.0.1",
 		"@paystack/inline-js": "^2.22.7",

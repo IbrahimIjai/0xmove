@@ -2,28 +2,17 @@ import { Hono } from "hono";
 import { db } from "../db/drizzle";
 import { user } from "../db/schema/auth-schema";
 import { eq } from "drizzle-orm";
-import { createPublicClient, http } from "viem";
+import { createPublicClient, http, erc20Abi, Address } from "viem";
 import { base } from "viem/chains";
 import { USDC, USDT } from "@0xmove/config/tokens";
 import { SUPPORTED_CHAIN_IDS, CHAIN_BY_ID } from "@0xmove/config/chains";
 
-const isEvmAddress = (addr: unknown): addr is `0x${string}` =>
+const isEvmAddress = (addr: unknown): addr is Address =>
 	typeof addr === "string" && /^0x[a-fA-F0-9]{40}$/.test(addr);
 
-const ERC20_ABI = [
-	{
-		type: "function",
-		name: "balanceOf",
-		stateMutability: "view",
-		inputs: [{ name: "account", type: "address" }],
-		outputs: [{ name: "balance", type: "uint256" }],
-	},
-] as const;
 
 const balances = new Hono();
 
-// GET /balances?address=0x...&chainId=84532
-// Returns fiat balances (NGN/KES) from DB and crypto balances (USDC/USDT) via viem.
 balances.get("/", async (c) => {
 	try {
 		const url = new URL(c.req.url);
@@ -34,7 +23,6 @@ balances.get("/", async (c) => {
 			return c.json({ error: "Invalid or missing address" }, 400);
 		}
 
-		const chainId = chainIdParam ? Number(chainIdParam) : base.id;
 		const rpcUrl = (process.env.RPC_URL || "").trim() || undefined;
 		// Prefer config mapping; fallback to env overrides if provided
 		const envUsdc = (process.env.USDC_ADDRESS || "").trim();
@@ -87,7 +75,7 @@ balances.get("/", async (c) => {
 			if (usdcAddress) {
 				contracts.push({
 					address: usdcAddress as `0x${string}`,
-					abi: ERC20_ABI,
+					abi: erc20Abi,
 					functionName: "balanceOf",
 					args: [address],
 				});
@@ -96,7 +84,7 @@ balances.get("/", async (c) => {
 			if (usdtAddress) {
 				contracts.push({
 					address: usdtAddress as `0x${string}`,
-					abi: ERC20_ABI,
+					abi: erc20Abi,
 					functionName: "balanceOf",
 					args: [address],
 				});

@@ -54,9 +54,9 @@
 								v-for="entry in balances.query.data.value?.crypto.USDC || []"
 								:key="'usdc-' + entry.chainId"
 								class="flex items-center justify-between">
-								<span class="text-xs opacity-70"
-									>Chain {{ entry.chainId }}</span
-								>
+								<span class="text-xs opacity-70">{{
+									chainName(entry.chainId)
+								}}</span>
 								<span class="text-lg font-semibold">{{
 									formatToken(entry.balance, 6)
 								}}</span>
@@ -72,9 +72,9 @@
 								v-for="entry in balances.query.data.value?.crypto.USDT || []"
 								:key="'usdt-' + entry.chainId"
 								class="flex items-center justify-between">
-								<span class="text-xs opacity-70"
-									>Chain {{ entry.chainId }}</span
-								>
+								<span class="text-xs opacity-70">{{
+									chainName(entry.chainId)
+								}}</span>
 								<span class="text-lg font-semibold">{{
 									formatToken(entry.balance, 6)
 								}}</span>
@@ -89,6 +89,7 @@
 
 <script setup lang="ts">
 import { useBalances } from "@/composables/useBalances";
+import { CHAIN_BY_ID } from "@0xmove/config";
 
 const balances = useBalances();
 
@@ -113,5 +114,10 @@ function formatToken(v?: string, decimals = 6) {
 	} catch {
 		return v;
 	}
+}
+
+function chainName(id: number): string {
+	const c = (CHAIN_BY_ID as any)[id];
+	return c?.name || `Chain ${id}`;
 }
 </script>
