@@ -17,7 +17,10 @@ export type BalancesResponse = {
 	address: `0x${string}`;
 	queriedChains: number[];
 	fiat: { NGN: string; KES: string };
-	crypto: { USDC: Array<{ chainId: number; balance: string }>; USDT: Array<{ chainId: number; balance: string }> };
+	crypto: {
+		USDC: Array<{ chainId: number; balance: string }>;
+		USDT: Array<{ chainId: number; balance: string }>;
+	};
 	tokenDecimals: { USDC: number; USDT: number };
 	updatedAt: string;
 };

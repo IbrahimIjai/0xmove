@@ -44,11 +44,11 @@ balances.get("/", async (c) => {
 		const chainIdsToQuery = chainIdParam
 			? [Number(chainIdParam)]
 			: Array.from(
-				new Set([
-					...Object.keys(USDC).map((x) => Number(x)),
-					...Object.keys(USDT).map((x) => Number(x)),
-				]),
-			);
+					new Set([
+						...Object.keys(USDC).map((x) => Number(x)),
+						...Object.keys(USDT).map((x) => Number(x)),
+					]),
+				);
 
 		// 1) Fiat from DB
 		const addressNorm = address.toLowerCase() as `0x${string}`;
@@ -64,7 +64,10 @@ balances.get("/", async (c) => {
 		};
 
 		// 2) Crypto via viem across chains
-		const crypto: { USDC: Array<{ chainId: number; balance: string }>; USDT: Array<{ chainId: number; balance: string }> } = {
+		const crypto: {
+			USDC: Array<{ chainId: number; balance: string }>;
+			USDT: Array<{ chainId: number; balance: string }>;
+		} = {
 			USDC: [],
 			USDT: [],
 		};
@@ -85,14 +88,24 @@ balances.get("/", async (c) => {
 			});
 
 			const contracts: any[] = [];
-			const mapIndex: Array<'USDC' | 'USDT'> = [];
+			const mapIndex: Array<"USDC" | "USDT"> = [];
 			if (usdcAddress) {
-				contracts.push({ address: usdcAddress as `0x${string}`, abi: ERC20_ABI, functionName: 'balanceOf', args: [address] });
-				mapIndex.push('USDC');
+				contracts.push({
+					address: usdcAddress as `0x${string}`,
+					abi: ERC20_ABI,
+					functionName: "balanceOf",
+					args: [address],
+				});
+				mapIndex.push("USDC");
 			}
 			if (usdtAddress) {
-				contracts.push({ address: usdtAddress as `0x${string}`, abi: ERC20_ABI, functionName: 'balanceOf', args: [address] });
-				mapIndex.push('USDT');
+				contracts.push({
+					address: usdtAddress as `0x${string}`,
+					abi: ERC20_ABI,
+					functionName: "balanceOf",
+					args: [address],
+				});
+				mapIndex.push("USDT");
 			}
 
 			if (!contracts.length) {
@@ -100,15 +113,20 @@ balances.get("/", async (c) => {
 			}
 
 			try {
-				const results: any[] = await client.multicall({ contracts, allowFailure: true });
+				const results: any[] = await client.multicall({
+					contracts,
+					allowFailure: true,
+				});
 				results.forEach((r: any, idx: number) => {
 					const token = mapIndex[idx];
-					const balance = r?.result ? (r.result as bigint).toString() : '0';
+					const balance = r?.result ? (r.result as bigint).toString() : "0";
 					crypto[token].push({ chainId: cid, balance });
 				});
 			} catch (e) {
 				// push zeros in case of failure
-				mapIndex.forEach((token) => crypto[token].push({ chainId: cid, balance: '0' }));
+				mapIndex.forEach((token) =>
+					crypto[token].push({ chainId: cid, balance: "0" }),
+				);
 			}
 		}
 

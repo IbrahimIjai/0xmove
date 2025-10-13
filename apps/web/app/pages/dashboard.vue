@@ -51,12 +51,15 @@
 						<div class="text-sm opacity-75">USDC</div>
 						<div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
 							<div
-								v-for="entry in (balances.query.data.value?.crypto.USDC || [])"
-								:key="'usdc-'+entry.chainId"
-								class="flex items-center justify-between"
-							>
-								<span class="text-xs opacity-70">Chain {{ entry.chainId }}</span>
-								<span class="text-lg font-semibold">{{ formatToken(entry.balance, 6) }}</span>
+								v-for="entry in balances.query.data.value?.crypto.USDC || []"
+								:key="'usdc-' + entry.chainId"
+								class="flex items-center justify-between">
+								<span class="text-xs opacity-70"
+									>Chain {{ entry.chainId }}</span
+								>
+								<span class="text-lg font-semibold">{{
+									formatToken(entry.balance, 6)
+								}}</span>
 							</div>
 						</div>
 					</div>
@@ -66,12 +69,15 @@
 						<div class="text-sm opacity-75">USDT</div>
 						<div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
 							<div
-								v-for="entry in (balances.query.data.value?.crypto.USDT || [])"
-								:key="'usdt-'+entry.chainId"
-								class="flex items-center justify-between"
-							>
-								<span class="text-xs opacity-70">Chain {{ entry.chainId }}</span>
-								<span class="text-lg font-semibold">{{ formatToken(entry.balance, 6) }}</span>
+								v-for="entry in balances.query.data.value?.crypto.USDT || []"
+								:key="'usdt-' + entry.chainId"
+								class="flex items-center justify-between">
+								<span class="text-xs opacity-70"
+									>Chain {{ entry.chainId }}</span
+								>
+								<span class="text-lg font-semibold">{{
+									formatToken(entry.balance, 6)
+								}}</span>
 							</div>
 						</div>
 					</div>
