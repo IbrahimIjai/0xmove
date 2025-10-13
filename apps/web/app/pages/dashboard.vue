@@ -89,7 +89,7 @@
 
 <script setup lang="ts">
 import { useBalances } from "@/composables/useBalances";
-import { CHAIN_BY_ID } from "@0xmove/config";
+import { CHAIN_BY_ID } from "@0xmove/config/chains";
 
 const balances = useBalances();
 

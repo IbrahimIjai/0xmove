@@ -26,7 +26,6 @@
 		"@nuxtjs/seo": "^3.0.1",
 		"@paystack/inline-js": "^2.22.7",
 		"@reown/appkit": "^1.8.8",
-		"@reown/appkit-adapter-solana": "^1.8.8",
 		"@reown/appkit-adapter-wagmi": "^1.8.8",
 		"@studio-freight/lenis": "^1.0.42",
 		"@tanstack/vue-query": "^5.90.2",

@@ -42,6 +42,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@0xmove/config':
+        specifier: workspace:*
+        version: link:../../packages/app-config
       '@iconify-json/lucide':
         specifier: ^1.2.46
         version: 1.2.68
