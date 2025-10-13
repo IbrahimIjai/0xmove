@@ -8,7 +8,6 @@
 
 		<div class="flex items-center gap-1.5">
 			<UButton @click="router.push('/dashboard')">Dashboard</UButton>
-			<!-- Connected address (desktop) -->
 			<UButton
 				v-if="isConnected && address"
 				variant="outline"
@@ -28,7 +27,6 @@
 						<div class="flex flex-col items-center gap-3">
 							<NuxtLink href="/swap" class="text-center">Swap</NuxtLink>
 							<NuxtLink href="/pool" class="text-center">Pools</NuxtLink>
-							<!-- Connected address (mobile) placed below links -->
 							<UButton
 								v-if="isConnected && address"
 								variant="outline"
