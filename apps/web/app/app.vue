@@ -1,17 +1,15 @@
 <template>
-	<client-only>
-		<Html :lang="seo.lang">
-			<UApp>
-				<NuxtLoadingIndicator color="var(--ui-primary)" :height="2" />
-				<NuxtLayout>
-					<Toaster position="bottom-right" close-button />
-					<SiteHeader />
-					<div class="min-h-[calc(100dvh-150px)] pt-[105px]"><NuxtPage /></div>
-					<Footer />
-				</NuxtLayout>
-			</UApp>
-		</Html>
-	</client-only>
+	<Html :lang="seo.lang">
+		<UApp>
+			<NuxtLoadingIndicator color="var(--ui-primary)" :height="2" />
+			<NuxtLayout>
+				<Toaster position="bottom-right" close-button />
+				<SiteHeader />
+				<div class="min-h-[calc(100dvh-150px)] pt-[105px]"><NuxtPage /></div>
+				<Footer />
+			</NuxtLayout>
+		</UApp>
+	</Html>
 </template>
 
 <script setup lang="ts">
@@ -43,36 +41,5 @@ useSeoMeta({
 	twitterImage:
 		"https://assets.hub.nuxt.com/eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJodHRwczovL3BvcnRmb2xpby10ZW1wbGF0ZS5udXh0LmRldiIsImlhdCI6MTc0NTkzNDczMX0.XDWnQoyVy3XVtKQD6PLQ8RFUwr4yr1QnVwPxRrjCrro.jpg?theme=light",
 	twitterCard: "summary_large_image",
-});
-
-import { createAppKit } from "@reown/appkit/vue";
-import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
-import { type AppKitNetwork } from "@reown/appkit/networks";
-import { chains } from "@/utils/reown-config";
-
-const projectId = "563770c2c39279113e697078705ad8cd"; //0xmove DO NOT USE, SIMPLY CREATE YOURS😆😆
-
-const metadata = {
-	name: "0xMove",
-	description: "0xMove",
-	url: "https://0xMove.xyz",
-	icons: ["https://avatars.githubusercontent.com/u/179229932"],
-};
-
-const networks: [AppKitNetwork, ...AppKitNetwork[]] = chains;
-
-const wagmiAdapter = new WagmiAdapter({
-	networks,
-	projectId,
-});
-
-createAppKit({
-	adapters: [wagmiAdapter],
-	networks,
-	projectId,
-	metadata,
-	features: {
-		analytics: true,
-	},
 });
 </script>

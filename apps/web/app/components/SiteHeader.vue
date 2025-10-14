@@ -1,6 +1,6 @@
 <template>
 	<header class="p-4 shadow-sm w-full flex items-center justify-between">
-		<NuxtLink href="/">0xMove</NuxtLink>
+		<NuxtLink to="/">0xMove</NuxtLink>
 		<UNavigationMenu
 			color="neutral"
 			:items="items"
@@ -25,8 +25,8 @@
 
 					<template #body>
 						<div class="flex flex-col items-center gap-3">
-							<NuxtLink href="/swap" class="text-center">Swap</NuxtLink>
-							<NuxtLink href="/pool" class="text-center">Pools</NuxtLink>
+							<NuxtLink to="/swap" class="text-center">Swap</NuxtLink>
+							<NuxtLink to="/pool" class="text-center">Pools</NuxtLink>
 							<UButton
 								v-if="isConnected && address"
 								variant="outline"
