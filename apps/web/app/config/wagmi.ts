@@ -1,9 +1,7 @@
 import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
-import { base,baseSepolia, celo
-    
- } from "@reown/appkit/networks";
+import { base, type AppKitNetwork } from "@reown/appkit/networks";
 
-export const networks = [baseSepolia, base, celo];
+export const networks = [base] as [AppKitNetwork, ...AppKitNetwork[]];
 
 export const projectId = "563770c2c39279113e697078705ad8cd";
 

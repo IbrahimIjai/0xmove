@@ -4,6 +4,8 @@ import { useAppKit } from "@reown/appkit/vue";
 import { useAppKitAccount } from "@reown/appkit/vue";
 import { useUser } from "@/composables/useUser";
 
+const { open } = useAppKit();
+
 const accountData = useAppKitAccount();
 const isConnected = computed(
 	() => toRef(accountData.value, "isConnected").value || false,
@@ -13,7 +15,7 @@ const address = computed(() => toRef(accountData.value, "address").value);
 const { userQuery } = useUser();
 
 const openConnection = () => {
-	useAppKit().open();
+	 open({ view: 'Connect' });
 };
 
 // When wallet connects, check if user exists and navigate accordingly

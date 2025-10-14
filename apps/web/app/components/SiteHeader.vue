@@ -7,7 +7,7 @@
 			class="hidden lg:inline-flex" />
 
 		<div class="flex items-center gap-1.5">
-			<UButton @click="router.push('/dashboard')">Dashboard</UButton>
+			<UButton to="/dashboard">Dashboard</UButton>
 			<UButton
 				v-if="isConnected && address"
 				variant="outline"
