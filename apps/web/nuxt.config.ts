@@ -5,6 +5,10 @@ export default defineNuxtConfig({
 	future: {
 		compatibilityVersion: 4,
 	},
+	ssr: true,
+	experimental: {
+		payloadExtraction: false,
+	},
 	runtimeConfig: {
 		public: {
 			projectId: process.env.NUXT_PROJECT_ID,
@@ -79,7 +83,11 @@ export default defineNuxtConfig({
 			"/api": {
 				target: process.env.NUXT_PUBLIC_API_BASE || "http://127.0.0.1:8787",
 				changeOrigin: true,
+				timeout: 60000,
 			},
+		},
+		experimental: {
+			wasm: true,
 		},
 	},
 });
