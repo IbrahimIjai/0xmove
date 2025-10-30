@@ -69,41 +69,37 @@
 	</div>
 </template>
 
-<script setup>
+<script setup lang="ts">
+import type { Token } from "~/utils/tokens";
 import { ALL_TOKENS } from "~/utils/tokens";
 import { SUPPORTED_CHAINS } from "~/utils/reown-config";
 
-const props = defineProps({
-	modelValue: {
-		type: Object,
-		default: null,
-	},
-	disabledTokens: {
-		type: Array,
-		default: () => [],
-	},
-});
+const props = defineProps<{
+	modelValue?: Token | null;
+	disabledTokens?: string[];
+}>();
 
-const emit = defineEmits(["update:modelValue"]);
+const emit = defineEmits<{
+	"update:modelValue": [token: Token];
+}>();
 
-const isOpen = ref(false);
+const isOpen = ref<boolean>(false);
 
-const searchQuery = ref("");
-console.log({ searchQuery: searchQuery.value });
+const searchQuery = ref<string>("");
 
-const filteredTokens = computed(() => {
-	let tokens = ALL_TOKENS;
+const filteredTokens = computed<Token[]>(() => {
+	let tokens: Token[] = ALL_TOKENS;
 
 	// Filter out disabled tokens
 	if (props.disabledTokens?.length) {
-		tokens = tokens.filter((t) => !props.disabledTokens?.includes(t.id));
+		tokens = tokens.filter((t: Token) => !props.disabledTokens?.includes(t.id));
 	}
 
 	// Filter by search query
 	if (searchQuery.value) {
 		const query = searchQuery.value.toLowerCase();
 		tokens = tokens.filter(
-			(t) =>
+			(t: Token) =>
 				t.name.toLowerCase().includes(query) ||
 				t.symbol.toLowerCase().includes(query) ||
 				(typeof t.address === "string" &&
@@ -114,14 +110,22 @@ const filteredTokens = computed(() => {
 	return tokens;
 });
 
-const getChainName = (chainId) => {
+const getChainName = (chainId: number): string => {
 	const chainEntry = Object.entries(SUPPORTED_CHAINS).find(
 		([, id]) => id === chainId,
 	);
 	return chainEntry ? chainEntry[0] : `Chain ${chainId}`;
 };
 
-function selectToken(token) {
+const getChainLogo = (chainId: number | undefined): string | undefined => {
+	// Return Base chain logo for Base chain, undefined for others or undefined
+	if (chainId === 8453) {
+		return "https://github.com/base-org/brand-kit/raw/main/logo/in-product/Base_Network_Logo.svg";
+	}
+	return undefined;
+};
+
+function selectToken(token: Token): void {
 	emit("update:modelValue", token);
 	isOpen.value = false;
 	searchQuery.value = "";

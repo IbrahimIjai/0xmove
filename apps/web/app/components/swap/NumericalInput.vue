@@ -11,7 +11,7 @@
 				placeholder="0"
 				:model-value="modelValue"
 				@update:model-value="handleInput" />
-			<p>0.00</p>
+			<p>${{ fiatValue }}</p>
 		</div>
 		<SwapTokenSelector
 			:model-value="selectedToken"
@@ -41,9 +41,12 @@ const emit = defineEmits<{
 const tokenStore = useTokenStore();
 const { formatTokenAmount } = useTokenRegistry();
 
-const fiatValue = ref("0.00");
+const fiatValue = ref<string>("0.00");
 
-const calculateFiatValue = (value: string, token: Token | undefined) => {
+const calculateFiatValue = (
+	value: string,
+	token: Token | undefined,
+): string => {
 	if (!value || !token) return "0.00";
 
 	const amount = parseFloat(value);
@@ -67,7 +70,7 @@ const calculateFiatValue = (value: string, token: Token | undefined) => {
 	}
 };
 
-const handleInput = (value: string) => {
+const handleInput = (value: string): void => {
 	if (!props.disabled) {
 		emit("update:modelValue", value);
 		emit("input", value);
@@ -77,30 +80,30 @@ const handleInput = (value: string) => {
 	fiatValue.value = calculateFiatValue(value, props.selectedToken);
 };
 
-const handleTokenChange = (token: Token | undefined) => {
+const handleTokenChange = (token: Token | undefined): void => {
 	emit("update:selectedToken", token);
 	// Recalculate fiat value with new token
 	fiatValue.value = calculateFiatValue(props.modelValue, token);
 };
 
-// Watch for external changes
+// Watch for external changes with proper TypeScript types
 watch(
 	() => props.modelValue,
-	(newValue) => {
+	(newValue: string) => {
 		fiatValue.value = calculateFiatValue(newValue, props.selectedToken);
 	},
 );
 
 watch(
 	() => props.selectedToken,
-	(newToken) => {
+	(newToken: Token | undefined) => {
 		fiatValue.value = calculateFiatValue(props.modelValue, newToken);
 	},
 );
 
 watch(
 	() => props.loading,
-	(isLoading) => {
+	(isLoading: boolean | undefined) => {
 		if (isLoading) {
 			fiatValue.value = "0.00";
 		}

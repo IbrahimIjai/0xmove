@@ -1,5 +1,17 @@
-<script setup>
-const props = withDefaults(defineProps(), {
+<script setup lang="ts">
+interface Props {
+	type?: "text" | "number" | "percent";
+	modelValue?: string;
+	variant?: "default" | "naked" | "outline";
+	size?: "sm" | "default";
+	isError?: boolean;
+	icon?: string;
+	unit?: string;
+	maxDecimals?: number;
+	id?: string;
+}
+
+const props = withDefaults(defineProps<Props>(), {
 	type: "text",
 	modelValue: "",
 	variant: "default",
@@ -8,38 +20,43 @@ const props = withDefaults(defineProps(), {
 	maxDecimals: undefined,
 });
 
-const emit = defineEmits();
+const emit = defineEmits<{
+	"update:modelValue": [value: string];
+	valueChange: [value: string];
+	change: [event: Event];
+}>();
 
-const inputRef = ref();
+const inputRef = ref<HTMLInputElement>();
 
 const inputRegex = /^\d*(?:\\[.])?\d*$/;
 
-const escapeRegExp = (string) => string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const escapeRegExp = (string: string): string =>
+	string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-const isTypeText = (type) => type === "text";
-const isTypeNumber = (type) => type === "number";
-const isTypePercent = (type) => type === "percent";
+const isTypeText = (type: string): type is "text" => type === "text";
+const isTypeNumber = (type: string): type is "number" => type === "number";
+const isTypePercent = (type: string): type is "percent" => type === "percent";
 
 /**
  * Computed properties for input attributes based on type
  */
-const computedPlaceholder = computed(() => {
+const computedPlaceholder = computed<string | undefined>(() => {
 	if (isTypeNumber(props.type)) return "0.0";
 	if (isTypePercent(props.type)) return "0";
 	return undefined;
 });
 
-const computedPattern = computed(() => {
+const computedPattern = computed<string | undefined>(() => {
 	if (isTypePercent(props.type)) return "^[0-9]*$";
 	return undefined;
 });
 
-const computedInputMode = computed(() => {
+const computedInputMode = computed<"decimal" | undefined>(() => {
 	if (isTypePercent(props.type)) return "decimal";
 	return undefined;
 });
 
-const computedMaxLength = computed(() => {
+const computedMaxLength = computed<number | undefined>(() => {
 	if (isTypePercent(props.type)) return 3;
 	return undefined;
 });
@@ -47,7 +64,7 @@ const computedMaxLength = computed(() => {
 /**
  * Computed classes for the input element
  */
-const inputClasses = computed(() => {
+const inputClasses = computed<string[]>(() => {
 	const baseClasses = [
 		"truncate",
 		"appearance-none",
@@ -190,15 +207,15 @@ const unitClasses = computed(() => {
 	return baseClasses;
 });
 
-const handleInput = (event) => {
-	const target = event.target;
+const handleInput = (event: Event): void => {
+	const target = event.target as HTMLInputElement;
 	const nextUserInput = target.value;
 
 	if (typeof nextUserInput === "undefined") {
 		return;
 	}
 
-	let validatedValue = nextUserInput;
+	let validatedValue: string = nextUserInput;
 
 	if (isTypeNumber(props.type)) {
 		// Replace commas with dots for decimal input
@@ -245,7 +262,7 @@ const handleInput = (event) => {
 	emit("update:modelValue", validatedValue);
 };
 
-const handleChange = (event) => {
+const handleChange = (event: Event): void => {
 	emit("change", event);
 };
 

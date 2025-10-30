@@ -21,69 +21,58 @@
 	</div>
 </template>
 
-<script setup>
-const props = defineProps({
-	modelValue: {
-		type: String,
-		required: true,
-	},
-	fieldType: {
-		type: String,
-		required: true,
-		validator: (value) => ["from", "to"].includes(value),
-	},
-	disabled: {
-		type: Boolean,
-		default: false,
-	},
-	loading: {
-		type: Boolean,
-		default: false,
-	},
-	disabledTokens: {
-		type: Array,
-		default: () => [],
-	},
-	selectedToken: {
-		type: Object,
-		default: null,
-	},
-});
+<script setup lang="ts">
+import type { Token } from "~/utils/tokens";
 
-const emit = defineEmits([
-	"update:modelValue",
-	"update:selectedToken",
-	"input",
-]);
+const props = defineProps<{
+	modelValue: string;
+	fieldType: "from" | "to";
+	disabled?: boolean;
+	loading?: boolean;
+	disabledTokens?: string[];
+	selectedToken?: Token | null;
+}>();
 
-const fiatValue = ref("0.00");
+const emit = defineEmits<{
+	"update:modelValue": [value: string];
+	"update:selectedToken": [token: Token | undefined];
+	input: [value: string];
+}>();
 
-const handleInput = (value) => {
+const fiatValue = ref<string>("0.00");
+
+const handleInput = (value: string): void => {
 	if (!props.disabled) {
 		emit("update:modelValue", value);
 		emit("input", value);
 	}
 
-	// Calculate fiat value (mock implementation)
+	// Calculate fiat value with proper type checking
 	if (value && props.selectedToken && !props.loading) {
-		const mockUsdRate = props.selectedToken.type === "fiat" ? 0.0012 : 1;
-		fiatValue.value = (parseFloat(value) * mockUsdRate).toFixed(2);
+		const numValue = parseFloat(value);
+		if (!isNaN(numValue)) {
+			const mockUsdRate = props.selectedToken.type === "fiat" ? 0.0012 : 1;
+			fiatValue.value = (numValue * mockUsdRate).toFixed(2);
+		}
 	} else {
 		fiatValue.value = "0.00";
 	}
 };
 
-const handleTokenChange = (token) => {
+const handleTokenChange = (token: Token | undefined): void => {
 	emit("update:selectedToken", token);
 };
 
-// Watch for external changes
+// Watch for external changes with proper TypeScript types
 watch(
 	() => props.modelValue,
-	(newValue) => {
+	(newValue: string) => {
 		if (newValue && props.selectedToken && !props.loading) {
-			const mockUsdRate = props.selectedToken.type === "fiat" ? 0.0012 : 1;
-			fiatValue.value = (parseFloat(newValue) * mockUsdRate).toFixed(2);
+			const numValue = parseFloat(newValue);
+			if (!isNaN(numValue)) {
+				const mockUsdRate = props.selectedToken.type === "fiat" ? 0.0012 : 1;
+				fiatValue.value = (numValue * mockUsdRate).toFixed(2);
+			}
 		} else {
 			fiatValue.value = "0.00";
 		}
@@ -92,7 +81,7 @@ watch(
 
 watch(
 	() => props.loading,
-	(isLoading) => {
+	(isLoading: boolean | undefined) => {
 		if (isLoading) {
 			fiatValue.value = "0.00";
 		}
