@@ -66,7 +66,7 @@ const swapState = reactive({
 const getDisabledTokens = (fieldType: "from" | "to"): string[] => {
   const otherToken =
     fieldType === "from" ? swapState.toToken : swapState.fromToken;
-  return otherToken ? [otherToken.tokenId] : [];
+  return otherToken ? [otherToken.id] : [];
 };
 
 // Computed properties
@@ -160,7 +160,7 @@ const fetchExchangeRate = useDebounceFn(
 const handleFromTokenChange = (token: Token | undefined) => {
   if (!token) return;
 
-  if (token.tokenId === swapState.toToken?.tokenId) {
+  if (token.id === swapState.toToken?.id) {
     toast.error("Invalid Selection", {
       description: "Cannot select the same token for both fields.",
     });
@@ -201,7 +201,7 @@ const handleFromTokenChange = (token: Token | undefined) => {
 const handleToTokenChange = (token: Token | undefined) => {
   if (!token) return;
 
-  if (token.tokenId === swapState.fromToken?.tokenId) {
+  if (token.id === swapState.fromToken?.id) {
     toast.error("Invalid Selection", {
       description: "Cannot select the same token for both fields.",
     });

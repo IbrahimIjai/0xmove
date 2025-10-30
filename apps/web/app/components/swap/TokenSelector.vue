@@ -1,92 +1,90 @@
 <template>
-  <div>
-    <UModal v-model:open="isOpen">
-      <UButton
-        color="neutral"
-        variant="outline"
-        class="rounded-full"
-        @click="isOpen = true"
-      >
-        <div class="flex items-center gap-1 relative">
-          <div class=" relative">
-            <UAvatar
-              v-if="modelValue?.logoURI"
-              :src="modelValue.logoURI"
-              size="md"
-            />
-            <!-- Small chain logo at bottom-right -->
-            <UAvatar
-              v-if="getChainLogo(modelValue?.chainId as SUPPORTED_CHAINS)"
-              :src="getChainLogo(modelValue?.chainId as SUPPORTED_CHAINS)"
-              size="3xs"
-              class="bg-gray-200 absolute -bottom-1 -right-1 z-20 ring-1 ring-white dark:ring-gray-900 rounded-full"
-            />
-          </div>
-          <span class="mx-1 whitespace-nowrap">{{
-            modelValue?.symbol || "Select Token"
-          }}</span>
-        </div>
-        <UIcon name="i-lucide-chevron-down" class="size-5" />
-      </UButton>
+	<div>
+		<UModal v-model:open="isOpen">
+			<UButton
+				color="neutral"
+				variant="outline"
+				class="rounded-full"
+				@click="isOpen = true">
+				<div class="flex items-center gap-1 relative">
+					<div class="relative">
+						<UAvatar
+							v-if="modelValue?.logoURI"
+							:src="modelValue.logoURI"
+							size="md" />
+						<!-- Small chain logo at bottom-right -->
+						<UAvatar
+							v-if="getChainLogo(modelValue?.chainId)"
+							:src="getChainLogo(modelValue?.chainId)"
+							size="3xs"
+							class="bg-gray-200 absolute -bottom-1 -right-1 z-20 ring-1 ring-white dark:ring-gray-900 rounded-full" />
+					</div>
+					<span class="mx-1 whitespace-nowrap">{{
+						modelValue?.symbol || "Select Token"
+					}}</span>
+				</div>
+				<UIcon name="i-lucide-chevron-down" class="size-5" />
+			</UButton>
 
-      <template #content>
-        <div class="py-4 px-2">
-          <div>
-            <h3 class="text-lg font-medium">Select Currency/Token</h3>
-          </div>
-          <UInput
-            v-model="searchQuery"
-            placeholder="Search name or paste address"
-            icon="i-heroicons-magnifying-glass"
-            class="mb-4 w-full rounded-lg"
-          />
+			<template #content>
+				<div class="py-4 px-2">
+					<div>
+						<h3 class="text-lg font-medium">Select Currency/Token</h3>
+					</div>
+					<UInput
+						v-model="searchQuery"
+						placeholder="Search name or paste address"
+						icon="i-heroicons-magnifying-glass"
+						class="mb-4 w-full rounded-lg" />
 
-          <div class="max-h-96 overflow-y-auto px-4">
-            <div
-              v-if="filteredTokens.length === 0"
-              class="text-center py-8 text-gray-500"
-            >
-              No tokens found
-            </div>
+					<div class="max-h-96 overflow-y-auto px-4">
+						<div
+							v-if="filteredTokens.length === 0"
+							class="text-center py-8 text-gray-500">
+							No tokens found
+						</div>
 
-            <div v-else>
-              <div
-                v-for="token in filteredTokens"
-                :key="token.tokenId"
-                class="flex items-center p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg cursor-pointer"
-                @click="selectToken(token)"
-              >
-                <UAvatar :src="token.logoURI" size="sm" />
-                <div class="ml-3 flex-1">
-                  <div class="font-medium">{{ token.symbol }}</div>
-                  <div class="text-xs text-gray-500">{{ token.name }}</div>
-                </div>
-                <div
-                  v-if="token.type === 'crypto'"
-                  class="text-xs text-gray-400"
-                >
-                  Chain: {{ getChainName(token.chainId as number) }}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </template>
-    </UModal>
-  </div>
+						<div v-else>
+							<div
+								v-for="token in filteredTokens"
+								:key="token.id"
+								class="flex items-center p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg cursor-pointer"
+								@click="selectToken(token)">
+								<UAvatar :src="token.logoURI" size="sm" />
+								<div class="ml-3 flex-1">
+									<div class="font-medium">{{ token.symbol }}</div>
+									<div class="text-xs text-gray-500">{{ token.name }}</div>
+								</div>
+								<div
+									v-if="token.type === 'crypto'"
+									class="text-xs text-gray-400">
+									Chain: {{ getChainName(token.chainId) }}
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</template>
+		</UModal>
+	</div>
 </template>
 
-<script setup lang="ts">
-import { ALL_TOKENS, type Token } from "@/utils/tokens";
-import { SUPPORTED_CHAINS } from "@/utils/reown-config";
-const props = defineProps<{
-  modelValue?: Token;
-  disabledTokens?: string[];
-}>();
+<script setup>
+import { ALL_TOKENS } from "~/utils/tokens";
+import { SUPPORTED_CHAINS } from "~/utils/reown-config";
 
-const emit = defineEmits<{
-  "update:modelValue": [value: Token | undefined];
-}>();
+const props = defineProps({
+	modelValue: {
+		type: Object,
+		default: null,
+	},
+	disabledTokens: {
+		type: Array,
+		default: () => [],
+	},
+});
+
+const emit = defineEmits(["update:modelValue"]);
 
 const isOpen = ref(false);
 
@@ -94,38 +92,38 @@ const searchQuery = ref("");
 console.log({ searchQuery: searchQuery.value });
 
 const filteredTokens = computed(() => {
-  let tokens = ALL_TOKENS;
+	let tokens = ALL_TOKENS;
 
-  // Filter out disabled tokens
-  if (props.disabledTokens?.length) {
-    tokens = tokens.filter((t) => !props.disabledTokens?.includes(t.tokenId));
-  }
+	// Filter out disabled tokens
+	if (props.disabledTokens?.length) {
+		tokens = tokens.filter((t) => !props.disabledTokens?.includes(t.id));
+	}
 
-  // Filter by search query
-  if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase();
-    tokens = tokens.filter(
-      (t) =>
-        t.name.toLowerCase().includes(query) ||
-        t.symbol.toLowerCase().includes(query) ||
-        (typeof t.address === "string" &&
-          t.address.toLowerCase().includes(query))
-    );
-  }
+	// Filter by search query
+	if (searchQuery.value) {
+		const query = searchQuery.value.toLowerCase();
+		tokens = tokens.filter(
+			(t) =>
+				t.name.toLowerCase().includes(query) ||
+				t.symbol.toLowerCase().includes(query) ||
+				(typeof t.address === "string" &&
+					t.address.toLowerCase().includes(query)),
+		);
+	}
 
-  return tokens;
+	return tokens;
 });
 
-const getChainName = (chainId: number): string => {
-  const chainEntry = Object.entries(SUPPORTED_CHAINS).find(
-    ([_, id]) => id === chainId
-  );
-  return chainEntry ? chainEntry[0] : `Chain ${chainId}`;
+const getChainName = (chainId) => {
+	const chainEntry = Object.entries(SUPPORTED_CHAINS).find(
+		([, id]) => id === chainId,
+	);
+	return chainEntry ? chainEntry[0] : `Chain ${chainId}`;
 };
 
-function selectToken(token: Token) {
-  emit("update:modelValue", token);
-  isOpen.value = false;
-  searchQuery.value = "";
+function selectToken(token) {
+	emit("update:modelValue", token);
+	isOpen.value = false;
+	searchQuery.value = "";
 }
 </script>

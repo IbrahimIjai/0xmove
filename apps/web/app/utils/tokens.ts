@@ -1,144 +1,144 @@
 import { SUPPORTED_CHAINS } from "./reown-config";
 
-export interface Token {
-	tokenId: string;
+// Token interfaces directly in this file to avoid import issues
+export interface BaseToken {
+	id: string;
 	name: string;
 	symbol: string;
-	decimals: number | "fiat";
-	chainId: SUPPORTED_CHAINS;
-	address: string;
 	logoURI: string;
-	type: "crypto" | "fiat";
+	chainId: SUPPORTED_CHAINS;
 }
 
-const TOKEN_ADDRESSES = {
-	xNGN: {
-		[SUPPORTED_CHAINS.BASE]: "0x1111111111111111111111111111111111111111",
-		[SUPPORTED_CHAINS.LISK]: "0x2222222222222222222222222222222222222222",
-		[SUPPORTED_CHAINS.CELO]: "0x3333333333333333333333333333333333333333",
-	},
-	USDC: {
-		[SUPPORTED_CHAINS.BASE]: "0x4444444444444444444444444444444444444444",
-		[SUPPORTED_CHAINS.LISK]: "0x5555555555555555555555555555555555555555",
-		[SUPPORTED_CHAINS.CELO]: "0x6666666666666666666666666666666666666666",
-	},
-	USDT: {
-		[SUPPORTED_CHAINS.BASE]: "0x7777777777777777777777777777777777777777",
-		[SUPPORTED_CHAINS.LISK]: "0x8888888888888888888888888888888888888888",
-		[SUPPORTED_CHAINS.CELO]: "0x9999999999999999999999999999999999999999",
-	},
+export interface CryptoToken extends BaseToken {
+	type: "crypto";
+	decimals: number;
+	address: `0x${string}`;
+	coingeckoId?: string;
+}
+
+export interface FiatToken extends BaseToken {
+	type: "fiat";
+	decimals: "fiat";
+	address: "fiat";
+	countryCode: string;
+	exchangeRate?: number;
+}
+
+export type Token = CryptoToken | FiatToken;
+
+// Actual token addresses for Base chain
+const BASE_TOKEN_ADDRESSES = {
+	USDC: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
 } as const;
 
-// Create tokens for all supported chains
-const createCryptoTokens = (): Token[] => {
+// Generate all supported tokens
+const generateTokens = (): Token[] => {
 	const tokens: Token[] = [];
-	// xNGN tokens
-	Object.entries(TOKEN_ADDRESSES.xNGN).forEach(([chainId, address]) => {
-		tokens.push({
-			tokenId: `${address}:${chainId}`,
-			name: "xNGN",
-			symbol: "xNGN",
-			decimals: 6,
-			chainId: chainId as SUPPORTED_CHAINS,
-			address,
-			logoURI: "/tokens/nigerian.svg",
-			type: "crypto",
-		});
+	const baseChainId = SUPPORTED_CHAINS.BASE;
+
+	// Add USDC token for Base chain
+	tokens.push({
+		id: `USDC:${baseChainId}`,
+		type: "crypto",
+		symbol: "USDC",
+		name: "USD Coin",
+		address: BASE_TOKEN_ADDRESSES.USDC,
+		decimals: 6,
+		logoURI: "/tokens/usdc.png",
+		chainId: baseChainId,
+		coingeckoId: "usd-coin",
 	});
 
-	// USDC tokens
-	Object.entries(TOKEN_ADDRESSES.USDC).forEach(([chainId, address]) => {
-		tokens.push({
-			tokenId: `${address}:${chainId}`,
-			name: "USD Coin",
-			symbol: "USDC",
-			decimals: 6,
-			chainId: chainId as SUPPORTED_CHAINS,
-			address,
-			logoURI: "/tokens/usdc.png",
-			type: "crypto",
-		});
+	// Add fiat tokens
+	tokens.push({
+		id: "NGN:fiat",
+		type: "fiat",
+		symbol: "NGN",
+		name: "Nigerian Naira",
+		address: "fiat",
+		decimals: "fiat",
+		logoURI: "/tokens/nigerian.svg",
+		chainId: baseChainId,
+		countryCode: "NG",
 	});
 
-	// USDT tokens
-	Object.entries(TOKEN_ADDRESSES.USDT).forEach(([chainId, address]) => {
-		tokens.push({
-			tokenId: `${address}:${chainId}`,
-			name: "Tether USD",
-			symbol: "USDT",
-			decimals: 6,
-			chainId: chainId as SUPPORTED_CHAINS,
-			address,
-			logoURI: "/tokens/usdt.jpg",
-			type: "crypto",
-		});
+	tokens.push({
+		id: "KES:fiat",
+		type: "fiat",
+		symbol: "KES",
+		name: "Kenyan Shilling",
+		address: "fiat",
+		decimals: "fiat",
+		logoURI: "/tokens/kenya.svg",
+		chainId: baseChainId,
+		countryCode: "KE",
 	});
 
 	return tokens;
 };
 
-const FIAT_TOKENS: Token[] = [
-	{
-		tokenId: "ngn",
-		name: "Nigerian Naira",
-		symbol: "NGN",
-		decimals: "fiat",
-		chainId: SUPPORTED_CHAINS.BASE,
-		address: "fiat",
-		logoURI: "/tokens/nigerian.svg",
-		type: "fiat",
-	},
-	{
-		tokenId: "ngn",
-		name: "Nigerian Naira",
-		symbol: "NGN",
-		decimals: "fiat",
-		chainId: SUPPORTED_CHAINS.CELO,
-		address: "fiat",
-		logoURI: "/tokens/nigerian.svg",
-		type: "fiat",
-	},
-	{
-		tokenId: "kes",
-		name: "Kenyan Shilling",
-		symbol: "KES",
-		decimals: "fiat",
-		chainId: SUPPORTED_CHAINS.BASE,
-		address: "fiat",
-		logoURI: "/tokens/kenya.svg",
-		type: "fiat",
-	},
-];
-
-export const ALL_TOKENS: Token[] = [...createCryptoTokens(), ...FIAT_TOKENS];
+export const ALL_TOKENS = generateTokens();
 
 // Utility functions
-export const findToken = (
+export const findTokenById = (tokenId: string): Token | undefined => {
+	return ALL_TOKENS.find((token) => token.id === tokenId);
+};
+
+export const findTokenBySymbol = (
+	symbol: string,
+	chainId?: number,
+): Token | undefined => {
+	if (chainId) {
+		return ALL_TOKENS.find(
+			(token) => token.symbol === symbol && token.chainId === chainId,
+		);
+	}
+	return ALL_TOKENS.find((token) => token.symbol === symbol);
+};
+
+export const findTokenByAddress = (
 	address: string,
 	chainId: number,
-): Token | undefined => {
-	console.log("Searching for address:", address, "chainId:", chainId);
-	console.log("ALL_TOKENS:", ALL_TOKENS);
-	const normAddress = address.toLowerCase();
+): CryptoToken | undefined => {
+	const normalizedAddress = address.toLowerCase();
 	return ALL_TOKENS.find(
-		(token) =>
-			token.address.toLowerCase() === normAddress &&
-			token.chainId.toString() === chainId.toString(),
+		(token): token is CryptoToken =>
+			token.type === "crypto" &&
+			token.address.toLowerCase() === normalizedAddress &&
+			token.chainId === chainId,
+	) as CryptoToken | undefined;
+};
+
+export const getCryptoTokens = (): CryptoToken[] => {
+	return ALL_TOKENS.filter(
+		(token): token is CryptoToken => token.type === "crypto",
 	);
 };
 
-export const findTokenById = (tokenId: string): Token | undefined => {
-	return ALL_TOKENS.find((token) => token.tokenId === tokenId);
+export const getFiatTokens = (): FiatToken[] => {
+	return ALL_TOKENS.filter(
+		(token): token is FiatToken => token.type === "fiat",
+	);
 };
 
-export const getTokensBySymbol = (symbol: string): Token[] => {
+// Type guards
+export const isCryptoToken = (token: Token): token is CryptoToken => {
+	return token.type === "crypto";
+};
+
+export const isFiatToken = (token: Token): token is FiatToken => {
+	return token.type === "fiat";
+};
+
+// Legacy compatibility
+export const findToken = (address: string, chainId: number) => {
+	console.warn("findToken is deprecated, use findTokenByAddress instead");
+	return findTokenByAddress(address, chainId);
+};
+
+export const getTokensBySymbol = (symbol: string) => {
+	console.warn(
+		"getTokensBySymbol is deprecated, use findTokenBySymbol instead",
+	);
 	return ALL_TOKENS.filter((token) => token.symbol === symbol);
-};
-
-export const getFiatTokens = (): Token[] => {
-	return ALL_TOKENS.filter((token) => token.type === "fiat");
-};
-
-export const getCryptoTokens = (): Token[] => {
-	return ALL_TOKENS.filter((token) => token.type === "crypto");
 };

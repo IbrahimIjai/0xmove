@@ -25,6 +25,7 @@
 		"@iconify-json/lucide": "^1.2.46",
 		"@nuxtjs/seo": "^3.0.1",
 		"@paystack/inline-js": "^2.22.7",
+		"@pinia/nuxt": "^0.11.2",
 		"@reown/appkit": "^1.8.12",
 		"@reown/appkit-adapter-wagmi": "^1.8.12",
 		"@studio-freight/lenis": "^1.0.42",

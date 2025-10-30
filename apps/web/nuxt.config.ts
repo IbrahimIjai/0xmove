@@ -24,6 +24,7 @@ export default defineNuxtConfig({
 		"@nuxt/image",
 		"motion-v/nuxt",
 		"@wagmi/vue/nuxt",
+		"@pinia/nuxt",
 	],
 	ui: {
 		theme: {
