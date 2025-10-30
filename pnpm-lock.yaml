@@ -91,8 +91,8 @@ importers:
         specifier: ^1.2.0
         version: 1.7.2(@vueuse/core@13.9.0(vue@3.5.22(typescript@5.9.3)))(react@18.3.1)(vue@3.5.22(typescript@5.9.3))
       tailwindcss:
-        specifier: 4.1.13
-        version: 4.1.13
+        specifier: 4.1.16
+        version: 4.1.16
       viem:
         specifier: ^2.38.5
         version: 2.38.5(bufferutil@4.0.9)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.1.12)
@@ -7901,9 +7901,6 @@ packages:
     peerDependenciesMeta:
       tailwind-merge:
         optional: true
-
-  tailwindcss@4.1.13:
-    resolution: {integrity: sha512-i+zidfmTqtwquj4hMEwdjshYYgMbOrPzb9a0M3ZgNa0JMoZeFC6bxZvO8yr8ozS6ix2SDz0+mvryPeBs2TFE+w==}
 
   tailwindcss@4.1.16:
     resolution: {integrity: sha512-pONL5awpaQX4LN5eiv7moSiSPd/DLDzKVRJz8Q9PgzmAdd1R4307GQS2ZpfiN7ZmekdQrfhZZiSE5jkLR4WNaA==}
@@ -19478,8 +19475,6 @@ snapshots:
       tailwindcss: 4.1.16
     optionalDependencies:
       tailwind-merge: 3.3.1
-
-  tailwindcss@4.1.13: {}
 
   tailwindcss@4.1.16: {}
 
