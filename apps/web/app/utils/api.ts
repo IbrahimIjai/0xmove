@@ -27,7 +27,6 @@ export type BalancesResponse = {
 
 const buildBaseUrl = () => {
 	const cfg = useRuntimeConfig();
-	// expect NUXT_PUBLIC_API_BASE to be set, else fallback to same-origin /api
 	const base =
 		(cfg.public as any).apiBase || (cfg.public as any).API_BASE || "/api";
 	return base.replace(/\/$/, "");

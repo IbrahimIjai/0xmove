@@ -1,7 +1,6 @@
-<script setup lang="ts">
+<script setup>
 import { computed, toRef, watch } from "vue";
-import { useAppKit } from "@reown/appkit/vue";
-import { useAppKitAccount } from "@reown/appkit/vue";
+import { useAppKit, useAppKitAccount } from "@reown/appkit/vue";
 import { useUser } from "@/composables/useUser";
 
 const { open } = useAppKit();
@@ -15,10 +14,9 @@ const address = computed(() => toRef(accountData.value, "address").value);
 const { userQuery } = useUser();
 
 const openConnection = () => {
-	 open({ view: 'Connect' });
+	open({ view: "Connect" });
 };
 
-// When wallet connects, check if user exists and navigate accordingly
 watch(isConnected, async (now) => {
 	if (!now) return;
 	await userQuery.refetch();
@@ -27,7 +25,7 @@ watch(isConnected, async (now) => {
 	else navigateTo("/onboarding");
 });
 
-const shortenAddress = (address: string | undefined): string => {
+const shortenAddress = (address) => {
 	if (!address) return "";
 	return `${address.slice(0, 6)}...${address.slice(-4)}`;
 };
@@ -36,9 +34,9 @@ const shortenAddress = (address: string | undefined): string => {
 <template>
 	<UButton
 		class="connect-button"
-		@click="openConnection"
 		:variant="isConnected ? 'outline' : 'solid'"
-		:loading="isConnected && !address">
+		:loading="isConnected && !address"
+		@click="openConnection">
 		<template v-if="isConnected">
 			{{ address ? shortenAddress(address) : "Loading..." }}
 		</template>

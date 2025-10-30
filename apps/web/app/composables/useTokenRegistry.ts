@@ -1,23 +1,7 @@
 import type { CryptoToken, FiatToken } from "~/utils/tokens";
 import type { SUPPORTED_CHAINS } from "~/utils/reown-config";
 
-/**
- * Composable for easily adding and managing tokens and chains
- * This provides a standardized way to extend the platform
- */
 export const useTokenRegistry = () => {
-	/**
-	 * Create a new crypto token configuration
-	 * @example
-	 * const newToken = createCryptoToken({
-	 *   symbol: "WETH",
-	 *   name: "Wrapped Ether",
-	 *   address: "0x4200000000000000000000000000000000000006",
-	 *   decimals: 18,
-	 *   logoURI: "/tokens/weth.png",
-	 *   coingeckoId: "weth"
-	 * });
-	 */
 	const createCryptoToken = (config: {
 		symbol: string;
 		name: string;
@@ -91,16 +75,11 @@ export const useTokenRegistry = () => {
 		};
 	};
 
-	/**
-	 * Validate token configuration
-	 */
 	const validateToken = (token: CryptoToken | FiatToken): boolean => {
-		// Basic validation
 		if (!token.id || !token.symbol || !token.name || !token.logoURI) {
 			return false;
 		}
 
-		// Type-specific validation
 		if (token.type === "crypto") {
 			return !!(
 				token.address &&
@@ -116,27 +95,17 @@ export const useTokenRegistry = () => {
 		return false;
 	};
 
-	/**
-	 * Helper to get token image URL with fallback
-	 */
 	const getTokenImageUrl = (token: { logoURI: string; symbol: string }) => {
-		// If logoURI starts with /, it's a local asset
 		if (token.logoURI.startsWith("/")) {
 			return token.logoURI;
 		}
 
-		// If it's a full URL, use it directly
 		if (token.logoURI.startsWith("http")) {
 			return token.logoURI;
 		}
 
-		// Fallback to local asset based on symbol
 		return `/tokens/${token.symbol.toLowerCase()}.png`;
 	};
-
-	/**
-	 * Format token amount with proper decimals
-	 */
 	const formatTokenAmount = (
 		amount: string | number,
 		token: { decimals: number | "fiat"; symbol: string },
@@ -151,7 +120,6 @@ export const useTokenRegistry = () => {
 		const numAmount = typeof amount === "string" ? parseFloat(amount) : amount;
 
 		if (token.decimals === "fiat") {
-			// Fiat formatting
 			const formatted = new Intl.NumberFormat(locale, {
 				minimumFractionDigits: 2,
 				maximumFractionDigits: precision || 2,
@@ -159,7 +127,6 @@ export const useTokenRegistry = () => {
 
 			return showSymbol ? `${formatted} ${token.symbol}` : formatted;
 		} else {
-			// Crypto formatting
 			const decimals = precision || (numAmount < 1 ? 6 : 4);
 			const formatted = new Intl.NumberFormat(locale, {
 				minimumFractionDigits: 0,
@@ -170,12 +137,8 @@ export const useTokenRegistry = () => {
 		}
 	};
 
-	/**
-	 * Generate contract interaction helpers for a token
-	 */
 	const getTokenContractHelpers = (token: CryptoToken) => {
 		return {
-			// ERC20 standard functions
 			transfer: {
 				functionName: "transfer",
 				abi: [

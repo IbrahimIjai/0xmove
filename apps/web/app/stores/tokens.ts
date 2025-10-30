@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { computed, ref } from "vue";
+import { computed, ref, type Ref, type ComputedRef } from "vue";
 import type { Token, CryptoToken, FiatToken } from "~/utils/tokens";
 import {
 	ALL_TOKENS,
@@ -12,20 +12,17 @@ import {
 import { SUPPORTED_CHAINS } from "~/utils/reown-config";
 
 export interface TokenStore {
-	// State
-	selectedFromToken: Token | null;
-	selectedToToken: Token | null;
-	favoriteTokens: string[]; // token IDs
-	exchangeRates: Record<string, number>; // fiat currency rates
-	tokenBalances: Record<string, string>; // token balances by token ID
+	selectedFromToken: Ref<Token | null>;
+	selectedToToken: Ref<Token | null>;
+	favoriteTokens: Ref<string[]>;
+	exchangeRates: Ref<Record<string, number>>;
+	tokenBalances: Ref<Record<string, string>>;
 
-	// Getters (computed)
-	allTokens: Token[];
-	cryptoTokens: CryptoToken[];
-	fiatTokens: FiatToken[];
-	baseChainTokens: Token[];
+	allTokens: ComputedRef<Token[]>;
+	cryptoTokens: ComputedRef<CryptoToken[]>;
+	fiatTokens: ComputedRef<FiatToken[]>;
+	baseChainTokens: ComputedRef<Token[]>;
 
-	// Actions
 	setFromToken: (token: Token | null) => void;
 	setToToken: (token: Token | null) => void;
 	swapTokens: () => void;
@@ -45,17 +42,15 @@ export interface TokenStore {
 }
 
 export const useTokenStore = defineStore("tokens", (): TokenStore => {
-	// State
 	const selectedFromToken = ref<Token | null>(null);
 	const selectedToToken = ref<Token | null>(null);
 	const favoriteTokens = ref<string[]>([]);
 	const exchangeRates = ref<Record<string, number>>({
-		NGN: 1650, // Default NGN to USD rate
-		KES: 130, // Default KES to USD rate
+		NGN: 1650,
+		KES: 130,
 	});
 	const tokenBalances = ref<Record<string, string>>({});
 
-	// Getters (computed)
 	const allTokens = computed(() => ALL_TOKENS);
 	const cryptoTokens = computed(() => getCryptoTokens());
 	const fiatTokens = computed(() => getFiatTokens());
@@ -63,7 +58,6 @@ export const useTokenStore = defineStore("tokens", (): TokenStore => {
 		ALL_TOKENS.filter((token) => token.chainId === SUPPORTED_CHAINS.BASE),
 	);
 
-	// Actions
 	const setFromToken = (token: Token | null) => {
 		selectedFromToken.value = token;
 	};
@@ -81,7 +75,6 @@ export const useTokenStore = defineStore("tokens", (): TokenStore => {
 	const addToFavorites = (tokenId: string) => {
 		if (!favoriteTokens.value.includes(tokenId)) {
 			favoriteTokens.value.push(tokenId);
-			// Persist to localStorage
 			if (import.meta.client) {
 				localStorage.setItem(
 					"tokenFavorites",
@@ -95,7 +88,6 @@ export const useTokenStore = defineStore("tokens", (): TokenStore => {
 		const index = favoriteTokens.value.indexOf(tokenId);
 		if (index > -1) {
 			favoriteTokens.value.splice(index, 1);
-			// Persist to localStorage
 			if (import.meta.client) {
 				localStorage.setItem(
 					"tokenFavorites",
@@ -137,7 +129,6 @@ export const useTokenStore = defineStore("tokens", (): TokenStore => {
 		return favoriteTokens.value.includes(tokenId);
 	};
 
-	// Initialize favorites from localStorage on client
 	if (import.meta.client) {
 		const stored = localStorage.getItem("tokenFavorites");
 		if (stored) {
@@ -149,7 +140,6 @@ export const useTokenStore = defineStore("tokens", (): TokenStore => {
 		}
 	}
 
-	// Set default tokens
 	if (!selectedFromToken.value) {
 		selectedFromToken.value = findTokenBySymbol("USDC") || null;
 	}
@@ -158,20 +148,15 @@ export const useTokenStore = defineStore("tokens", (): TokenStore => {
 	}
 
 	return {
-		// State
 		selectedFromToken,
 		selectedToToken,
 		favoriteTokens,
 		exchangeRates,
 		tokenBalances,
-
-		// Getters
 		allTokens,
 		cryptoTokens,
 		fiatTokens,
 		baseChainTokens,
-
-		// Actions
 		setFromToken,
 		setToToken,
 		swapTokens,

@@ -1,6 +1,4 @@
 import { SUPPORTED_CHAINS } from "./reown-config";
-
-// Token interfaces directly in this file to avoid import issues
 export interface BaseToken {
 	id: string;
 	name: string;
@@ -26,17 +24,13 @@ export interface FiatToken extends BaseToken {
 
 export type Token = CryptoToken | FiatToken;
 
-// Actual token addresses for Base chain
 const BASE_TOKEN_ADDRESSES = {
 	USDC: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
 } as const;
 
-// Generate all supported tokens
 const generateTokens = (): Token[] => {
 	const tokens: Token[] = [];
 	const baseChainId = SUPPORTED_CHAINS.BASE;
-
-	// Add USDC token for Base chain
 	tokens.push({
 		id: `USDC:${baseChainId}`,
 		type: "crypto",
@@ -78,8 +72,6 @@ const generateTokens = (): Token[] => {
 };
 
 export const ALL_TOKENS = generateTokens();
-
-// Utility functions
 export const findTokenById = (tokenId: string): Token | undefined => {
 	return ALL_TOKENS.find((token) => token.id === tokenId);
 };
@@ -121,7 +113,6 @@ export const getFiatTokens = (): FiatToken[] => {
 	);
 };
 
-// Type guards
 export const isCryptoToken = (token: Token): token is CryptoToken => {
 	return token.type === "crypto";
 };
@@ -130,7 +121,6 @@ export const isFiatToken = (token: Token): token is FiatToken => {
 	return token.type === "fiat";
 };
 
-// Legacy compatibility
 export const findToken = (address: string, chainId: number) => {
 	console.warn("findToken is deprecated, use findTokenByAddress instead");
 	return findTokenByAddress(address, chainId);

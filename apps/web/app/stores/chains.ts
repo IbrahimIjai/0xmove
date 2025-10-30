@@ -18,16 +18,11 @@ export interface ChainInfo {
 }
 
 export interface ChainStore {
-	// State (reactive refs)
 	currentChainId: Ref<SupportedChainType>;
 	connectionStatus: Ref<"connected" | "connecting" | "disconnected">;
-
-	// Getters (computed refs)
 	supportedChains: ComputedRef<ChainInfo[]>;
 	currentChain: ComputedRef<ChainInfo | null>;
 	isBaseChain: ComputedRef<boolean>;
-
-	// Actions
 	setCurrentChain: (chainId: SupportedChainType) => void;
 	setConnectionStatus: (
 		status: "connected" | "connecting" | "disconnected",
@@ -37,13 +32,11 @@ export interface ChainStore {
 }
 
 export const useChainStore = defineStore("chains", (): ChainStore => {
-	// State
 	const currentChainId = ref<SupportedChainType>(SUPPORTED_CHAINS.BASE);
 	const connectionStatus = ref<"connected" | "connecting" | "disconnected">(
 		"disconnected",
 	);
 
-	// Getters
 	const supportedChains = computed((): ChainInfo[] => {
 		return Object.entries(SUPPORTED_CHAINS).map(([key, chainId]) => ({
 			id: chainId,
@@ -67,7 +60,6 @@ export const useChainStore = defineStore("chains", (): ChainStore => {
 		return currentChainId.value === SUPPORTED_CHAINS.BASE;
 	});
 
-	// Actions
 	const setCurrentChain = (chainId: SupportedChainType) => {
 		currentChainId.value = chainId;
 	};
@@ -89,16 +81,11 @@ export const useChainStore = defineStore("chains", (): ChainStore => {
 	};
 
 	return {
-		// State
 		currentChainId,
 		connectionStatus,
-
-		// Getters
 		supportedChains,
 		currentChain,
 		isBaseChain,
-
-		// Actions
 		setCurrentChain,
 		setConnectionStatus,
 		getChainInfo,
@@ -106,7 +93,6 @@ export const useChainStore = defineStore("chains", (): ChainStore => {
 	};
 });
 
-// Helper functions
 function getBlockExplorerUrl(chainId: SupportedChainType): string {
 	switch (chainId) {
 		case SUPPORTED_CHAINS.BASE:

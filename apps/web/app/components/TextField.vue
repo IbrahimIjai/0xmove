@@ -1,50 +1,5 @@
-<script setup lang="ts">
-/**
- * TextField Component for Nuxt.js with Nuxt UI
- *
- * A versatile input component that supports text, number, and percent input types
- * with validation, icons, units, and multiple styling variants.
- *
- * Features:
- * - Multiple input types (text, number, percent)
- * - Regex-based validation for numeric inputs
- * - Icon support using Nuxt Icon
- * - Unit suffix display
- * - Error state styling
- * - Decimal precision control for numbers
- * - Responsive design with Tailwind CSS
- */
-
-interface Props {
-	/** The input type - determines validation and behavior */
-	type?: "text" | "number" | "percent";
-	/** Current input value */
-	modelValue?: string;
-	/** Visual variant of the input */
-	variant?: "default" | "naked" | "outline";
-	/** Size variant */
-	size?: "sm" | "default";
-	/** Whether the input is in an error state */
-	isError?: boolean;
-	/** Icon name (Nuxt Icon compatible) */
-	icon?: string;
-	/** Unit to display after the input */
-	unit?: string;
-	/** Maximum decimal places for number type */
-	maxDecimals?: number;
-	/** Input ID */
-	id?: string;
-}
-
-interface Emits {
-	/** Emitted when the input value changes */
-	(e: "update:modelValue" | "valueChange", value: string): void;
-	/** Standard input change event */
-	(e: "change", event: Event): void;
-}
-
-// Props with defaults
-const props = withDefaults(defineProps<Props>(), {
+<script setup>
+const props = withDefaults(defineProps(), {
 	type: "text",
 	modelValue: "",
 	variant: "default",
@@ -53,27 +8,17 @@ const props = withDefaults(defineProps<Props>(), {
 	maxDecimals: undefined,
 });
 
-// Emits
-const emit = defineEmits<Emits>();
+const emit = defineEmits();
 
-// Template ref
-const inputRef = ref<HTMLInputElement>();
+const inputRef = ref();
 
-// Regex for numeric validation - matches digits and escaped decimal points
 const inputRegex = /^\d*(?:\\[.])?\d*$/;
 
-/**
- * Escapes special regex characters in a string
- */
-const escapeRegExp = (string: string): string =>
-	string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const escapeRegExp = (string) => string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-/**
- * Type guard functions for better type safety
- */
-const isTypeText = (type: string): type is "text" => type === "text";
-const isTypeNumber = (type: string): type is "number" => type === "number";
-const isTypePercent = (type: string): type is "percent" => type === "percent";
+const isTypeText = (type) => type === "text";
+const isTypeNumber = (type) => type === "number";
+const isTypePercent = (type) => type === "percent";
 
 /**
  * Computed properties for input attributes based on type
@@ -245,11 +190,8 @@ const unitClasses = computed(() => {
 	return baseClasses;
 });
 
-/**
- * Handles input events with validation based on type
- */
-const handleInput = (event: Event) => {
-	const target = event.target as HTMLInputElement;
+const handleInput = (event) => {
+	const target = event.target;
 	const nextUserInput = target.value;
 
 	if (typeof nextUserInput === "undefined") {
@@ -303,10 +245,7 @@ const handleInput = (event: Event) => {
 	emit("update:modelValue", validatedValue);
 };
 
-/**
- * Handles change events
- */
-const handleChange = (event: Event) => {
+const handleChange = (event) => {
 	emit("change", event);
 };
 
