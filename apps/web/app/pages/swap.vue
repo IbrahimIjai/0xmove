@@ -1,9 +1,9 @@
 <template>
-	<div>
+	<div class="min-h-[80vh] flex items-center justify-center px-3 sm:px-4">
 		<div
-			class="max-w-md mx-auto mt-10 space-y-4 border border-default rounded-xl p-2.5">
-			<div>
-				<h1 class="text-xl font-bold text-left">Swap</h1>
+			class="w-full max-w-md space-y-3 rounded-2xl border border-default/70 bg-background/60 backdrop-blur-sm shadow-sm p-3 sm:p-4">
+			<div class="flex items-center justify-between">
+				<h1 class="text-base font-semibold tracking-tight">Swap</h1>
 			</div>
 			<SwapSelectPanel
 				v-model="swapState.fromAmount"
@@ -15,10 +15,10 @@
 				@input="handleFromAmountChange" />
 			<!-- Swap Direction Toggle -->
 			<div
-				class="flex justify-center items-center border border-default w-fit mx-auto rounded-full p-1.5 cursor-pointer hover:bg-muted/70">
+				class="flex justify-center items-center w-fit mx-auto rounded-full border border-default/70 bg-muted/20 p-1 hover:bg-muted/40 transition-colors">
 				<UIcon
 					name="i-lucide-chevron-down"
-					class="size-7"
+					class="size-6"
 					color="primary"
 					@click="swapTokens" />
 			</div>
